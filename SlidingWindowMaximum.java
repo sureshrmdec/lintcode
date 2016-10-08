@@ -2,6 +2,7 @@ import java.util.PriorityQueue;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ArrayDeque;
 
 public class SlidingWindowMaximum {
     // Sliding Window Maximum
@@ -46,7 +47,7 @@ public class SlidingWindowMaximum {
             private void print() {
                 //System.out.print("N = " + N + ", A = ");
                 //for (int i = 0; i < N; ++i)
-                    //System.out.print(A[i] + " ");
+                //System.out.print(A[i] + " ");
                 //System.out.println();
                 //System.out.println("in2out: " + in2out);
                 //System.out.println("out2in: " + out2in);
@@ -94,7 +95,7 @@ public class SlidingWindowMaximum {
                 int tmp = A[i];
                 A[i] = A[j];
                 A[j] = tmp;
-                
+
                 //System.out.println("Before exch out2in: " + i + ", " + j + ", "+ out2in);
                 out2in.put(in2out.get(i), j);
                 out2in.put(in2out.get(j), i);
@@ -126,11 +127,45 @@ public class SlidingWindowMaximum {
         }
     }
 
+    public static class Solution2 {
+        // use deque
+
+        private ArrayDeque<Integer> deque = new ArrayDeque<Integer>();
+
+        private void add(int v) {
+            while (!deque.isEmpty() && deque.peekLast() < v)
+                deque.pollLast();
+
+            deque.add(v);
+        }
+
+        private void remove(int v) {
+            if (deque.peekFirst() == v)
+                deque.pollFirst();
+        }
+
+        public ArrayList<Integer> maxSlidingWindow(int[] nums, int k) {
+            ArrayList<Integer> result = new ArrayList<Integer>();
+            if (nums.length == 0) return result;
+
+            for (int i = 0; i < k - 1; ++i)
+                add(nums[i]);
+
+            for (int i = k - 1; i < nums.length; ++i) {
+                add(nums[i]);               // now k elements
+                result.add(deque.peekFirst());
+                remove(nums[i - k + 1]);    // now k - 1 elements
+            }
+
+            return result;
+        }
+    }
+
     public static void main(String[] args) {
         int nums1[] = {1,2,7,7,2,10,3,4,5};
         int k1 = 2;
 
-        Solution s = new Solution();
+        Solution2 s = new Solution2();
         System.out.println(s.maxSlidingWindow(nums1, k1));
     }
 }
