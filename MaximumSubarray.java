@@ -32,6 +32,24 @@ public class MaximumSubarray {
         }
     }
 
+    public static class Solution2 {
+        public int maxSubArray(int[] nums) {
+            int n = nums.length;
+            if (n == 0) return 0;
+
+            int sum = 0;
+            int max = nums[0];
+
+            for (int i = 0; i < n; ++i) {
+                sum += nums[i];
+                max = Math.max(max, sum);
+
+                if (sum < 0) sum = 0;
+            }
+            return max;
+        }
+    }
+
     public static void main(String[] args) {
         //int[] array = {-2,2,-3,4,-1,2,1,-5,3};
         int[] array = {-1};
