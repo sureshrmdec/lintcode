@@ -24,6 +24,66 @@ public class TestcaseReader {
         }
     }
 
+    public String readAllLines() throws IOException {
+        String line = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+            while ((line = reader.readLine()) != null)
+                sb.append(line);
+
+            return sb.toString();
+        }
+        catch (IOException e) {
+            System.err.format("IOException: " + e);
+        }
+
+        return line;
+    }
+
+    public int[] readArray() throws IOException {
+        try {
+            String[] strArray = readStringArray();
+            int[] array = new int[strArray.length];
+            int k = 0;
+            for (String s: strArray)
+                array[k++] = Integer.parseInt(s);
+
+            return array;
+        }
+        catch (IOException e) {
+            System.err.format("IOException: " + e);
+        }
+
+        return null;
+    }
+
+    public String[] readStringArray() throws IOException {
+        try {
+            String line = reader.readLine();
+
+            ArrayList<String> list = new ArrayList<String>();
+            String str = "";
+            for (int i = 0; i < line.length(); ++i) {
+                char c = line.charAt(i);
+                if (c == '[' || c == ',' || c == ']' || c == ' ' || c == '"') {
+                    if (str.isEmpty()) continue;
+                    list.add(str);
+                    str = "";
+                }
+                else str += c;
+            }
+
+            String[] array = new String[list.size()];
+            array = list.toArray(array);
+            return array;
+        }
+        catch (IOException e) {
+            System.err.format("IOException: " + e);
+        }
+
+        return null;
+    }
+
     public int[][] readMatrix() throws IOException {
 
         try {
