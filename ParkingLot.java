@@ -25,42 +25,86 @@ class Bus extends Vehicle {
 
 /* Represents a level in a parking garage */
 class Level {
-    private boolean[][] grid;
+    private Vehicle[][] grid;
 
     public Level(int rows, int spots) {
-        grid = new boolean[rows][spots];
+        grid = new Vehicle[rows][spots];
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < spots; ++j)
+                grid[i][j] = null;
     }
 
     public boolean park(Vehicle v) {
+        List<Integer> list = findSpace(v);
+        if (list == null) return false;
+
+        int i = list.get(0);
+        int j = list.get(1);
+        int len = 1;
+        if (v.size() == VehicleSize.Large) len = 5;
+        while (len > 0) {
+            grid[i][j + len - 1] = v;
+            len--;
+        }
+
+        return true;
+    }
+
+    public boolean unPark(Vehicle v) {
         int m = grid.length, n = grid[0].length;
 
-        int start = 0, end = 0, step = 1;
+        int count = v.size() == VehicleSize.Large ? 5 : 1;
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (grid[i][j] == v) {
+                    grid[i][j] = null;
+                    count--;
+                }
+
+                if (count == 0) return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Integer> findSpace(Vehicle v) {
+        int m = grid.length, n = grid[0].length;
+
+        int start = 0, end = 0, len = 1;
         switch (v.size()) {
-            case Motorcycle:    start = 0;          end = n; step = 1; break;
-            case Compact:       start = n / 4;      end = n; step = 1; break;
-            case Large:         start = n / 4 * 3;  end = n; step = 5; break;
+            case Motorcycle:    start = 0;          end = n; len = 1; break;
+            case Compact:       start = n / 4;      end = n; len = 1; break;
+            case Large:         start = n / 4 * 3;  end = n; len = 5; break;
             default: break;
         }
 
         for (int i = 0; i < m; ++i) {
             for (int j = start; j < end; ++j) {
-                while (grid[i][j] == false && j < end) ++j;
+                while (j < end && grid[i][j] != null) ++j;
 
                 int count = 0;
-                while (grid[i][j] == true && j < end) {
-                    ++j;
-                    if (++count == step) {
-                        while (count > 0) {
-                            grid[i][j - count] = false;
-                            count--;
-                        }
-                        return true;
+                while (j < end && grid[i][j] == null) {
+                    if (++count == len) {
+
+                        List<Integer> ret = new ArrayList<Integer>();
+                        ret.add(i);
+                        ret.add(j - count + 1);
+                        return ret;
                     }
+                    ++j;
                 }
             }
         }
+        return null;
+    }
 
-        return false;
+    public void debugPrint() {
+        int m = grid.length, n = grid[0].length;
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j)
+                System.out.print(grid[i][j] + ", ");
+            System.out.println();
+        }
     }
 }
 
@@ -90,7 +134,46 @@ public class ParkingLot {
     }
 
     // unPark the vehicle
-    public void unParkVehicle(Vehicle vehicle) {
-        
+    public void unParkVehicle(Vehicle v) {
+        for (Level l: levels) {
+            if (l.unPark(v)) return;
+        }
+    }
+
+    private void debug() {
+        int count = 0;
+        for (Level l: levels) {
+            System.out.println("Level: " + count);
+            l.debugPrint();
+        }
+    }
+
+    public static void main(String[] args) {
+        ParkingLot p = new ParkingLot(1, 1, 11);
+        Vehicle Motorcycle_1 = new Motorcycle();
+        Vehicle Car_1 = new Car();
+        Vehicle Car_2 = new Car();
+        Vehicle Car_3 = new Car();
+        Vehicle Car_4 = new Car();
+        Vehicle Car_5 = new Car();
+        Vehicle Bus_1 = new Bus();
+
+        System.out.println(p.parkVehicle(Motorcycle_1)); // return true
+        p.debug();
+        System.out.println(p.parkVehicle(Car_1)); // return true
+        p.debug();
+        System.out.println(p.parkVehicle(Car_2)); // return true
+        p.debug();
+        System.out.println(p.parkVehicle(Car_3)); // return true
+        p.debug();
+        System.out.println(p.parkVehicle(Car_4)); // return true
+        p.debug();
+        System.out.println(p.parkVehicle(Car_5)); // return true
+        p.debug();
+        System.out.println(p.parkVehicle(Bus_1)); // return false
+        p.unParkVehicle(Car_5);
+        p.debug();
+        System.out.println(p.parkVehicle(Bus_1)); // return true
+        p.debug();
     }
 }
